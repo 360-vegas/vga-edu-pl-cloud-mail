@@ -13,11 +13,11 @@
       <Icon icon="carbon:settings" />
       <template #title>个人设置</template>
     </el-menu-item>
-    <el-menu-item index="/sys-setting">
+    <el-menu-item v-if="showSysSetting" index="/sys-setting">
       <Icon icon="carbon:settings-services" />
       <template #title>系统设置</template>
     </el-menu-item>
-    <el-menu-item v-if="userStore.user.type === 0" index="/user-manage">
+    <el-menu-item v-if="showSysSetting" index="/user-manage">
       <Icon icon="carbon:user-multiple" />
       <template #title>用户管理</template>
     </el-menu-item>
@@ -29,8 +29,10 @@ import { useRoute } from 'vue-router';
 import { Icon } from '@iconify/vue';
 import { useUiStore } from '@/store/ui';
 import { useUserStore } from '@/store/user';
+import { computed } from 'vue';
 
 const route = useRoute();
 const uiStore = useUiStore();
 const userStore = useUserStore();
+const showSysSetting = computed(() => userStore.user.type === 0);
 </script> 
