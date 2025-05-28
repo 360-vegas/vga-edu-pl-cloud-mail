@@ -18,6 +18,17 @@ app.delete('/user/delete', async (c) => {
 	return c.json(result.ok());
 })
 
+app.get('/user/list', async (c) => {
+	// 管理员校验
+	const user = await userService.loginUserInfo(c, await userContext.getUserId(c));
+	if (user.type !== 0) {
+		return c.json(result.fail('无权限'), 403);
+	}
+	const { page, pageSize, email } = c.req.query();
+	const data = await userService.listUsers(c, { page, pageSize, email });
+	return c.json(result.ok(data));
+});
+
 
 
 
