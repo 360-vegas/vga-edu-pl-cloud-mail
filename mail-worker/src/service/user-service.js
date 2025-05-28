@@ -20,7 +20,6 @@ const userService = {
 	},
 
 	async resetPassword(c, params, userId) {
-
 		const { password } = params;
 
 		if (password < 6) {
@@ -61,7 +60,7 @@ const userService = {
 			c.env.kv.delete(kvConst.AUTH_INFO + userId),
 			accountService.removeByUserId(c, userId)
 		]);
-	}
+	},
 
 	async listUsers(c, params) {
 		const { page = 1, pageSize = 10, email = '' } = params;
