@@ -15,7 +15,10 @@ const userService = {
 		delete user.password;
 		delete user.salt;
 		user.accountId = account.accountId;
-		user.type = c.env.admin === user.email ? 0 : 1;
+		// 增强管理员判断，忽略大小写和前后空格
+		const adminEmail = c.env.admin?.trim().toLowerCase();
+		const userEmail = user.email?.trim().toLowerCase();
+		user.type = adminEmail === userEmail ? 0 : 1;
 		return user;
 	},
 
