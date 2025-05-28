@@ -2,7 +2,7 @@ import BizError from '../error/biz-error';
 import accountService from './account-service';
 import orm from '../entity/orm';
 import user from '../entity/user';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, like, desc, sql } from 'drizzle-orm';
 import { isDel } from '../const/entity-const';
 import kvConst from '../const/kv-const';
 import cryptoUtils from '../utils/crypto-utils';
@@ -61,6 +61,68 @@ const userService = {
 			c.env.kv.delete(kvConst.AUTH_INFO + userId),
 			accountService.removeByUserId(c, userId)
 		]);
+	}
+
+	async listUsers(c, params) {
+		const { page = 1, pageSize = 10, email = '' } = params;
+		const offset = (page - 1) * pageSize;
+
+		const query = orm(c).select().from(user)
+			.where(and(
+				eq(user.isDel, isDel.NORMAL),
+				email ? like(user.email, `%${email}%`) : undefined
+			))
+			.orderBy(desc(user.createTime))
+			.limit(pageSize)
+			.offset(offset);
+
+		const totalQuery = orm(c).select({ count: sql`count(*)` }).from(user)
+			.where(and(
+				eq(user.isDel, isDel.NORMAL),
+				email ? like(user.email, `%${email}%`) : undefined
+			));
+
+		const [users, total] = await Promise.all([
+			query.all(),
+			totalQuery.get()
+		]);
+
+		// Remove sensitive information
+		users.forEach(u => {
+			delete u.password;
+			delete u.salt;
+		});
+
+		return {
+			list: users,
+			total: total.count
+		};
+	},
+
+	async updateUser(c, userId, params) {
+		const { email, type, disabled } = params;
+		
+		// Check if email already exists
+		if (email) {
+			const existingUser = await userService.selectByEmailIncludeDel(c, email);
+			if (existingUser && existingUser.userId !== userId) {
+				throw new BizError('邮箱已被使用');
+			}
+		}
+
+		const updateData = {};
+		if (email !== undefined) updateData.email = email;
+		if (type !== undefined) updateData.type = type;
+		if (disabled !== undefined) updateData.disabled = disabled;
+
+		await orm(c).update(user)
+			.set(updateData)
+			.where(eq(user.userId, userId))
+			.run();
+	},
+
+	async deleteUser(c, userId) {
+		await userService.delete(c, userId);
 	}
 };
 

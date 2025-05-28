@@ -7,6 +7,7 @@ const user = sqliteTable('user', {
 	password: text('password').notNull(),
 	salt: text('salt').notNull(),
 	status: integer('status').default(0).notNull(),
+	disabled: integer('disabled').default(0).notNull(),
 	createTime: text('create_time').default(sql`CURRENT_TIMESTAMP`),
 	activeTime: text('active_time'),
 	isDel: integer('is_del').default(0).notNull(),

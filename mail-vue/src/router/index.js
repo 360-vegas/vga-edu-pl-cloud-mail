@@ -62,6 +62,17 @@ const routes = [
                     menu: true
                 }
             },
+            {
+                path: '/user-manage',
+                name: 'user-manage',
+                component: () => import('@/views/user-manage/index.vue'),
+                meta: {
+                    title: '用户管理',
+                    name: 'user-manage',
+                    menu: true,
+                    admin: true
+                }
+            },
         ]
 
     },
